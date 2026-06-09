@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Para a Andriely</title>
+
+<!-- ========================================================= -->
+<!--  Fontes                                                   -->
+<!-- ========================================================= -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Mulish:wght@300;400;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+
+<!-- ========================================================= -->
+<!--  Mapa (Leaflet), precisa de internet pra carregar         -->
+<!-- ========================================================= -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<style>
+  /* ====== PALETA ====== */
+  :root{
+    --ink:#2c2519;
+    --ink-soft:#6f6450;
+    --linen:#faf5ea;
+    --linen-2:#f1e7d2;
+    --rose:#b5862a;
+    --wine:#7d4f17;
+    --gold:#e0bb45;
+    --dark:#1c1813;
+    --dark-soft:#cabb9a;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Mulish',sans-serif;
+    background:var(--linen);
+    color:var(--ink);
+    line-height:1.7;
+    font-weight:300;
+    overflow-x:hidden;
+  }
+  body.travado{overflow:hidden;height:100vh}
+
+  .serif{font-family:'Cormorant Garamond',serif}
+  .mao{font-family:'Caveat',cursive}
+
+  .eyebrow{
+    font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--rose);font-weight:600;
+  }
+
+  section{padding:7rem 1.5rem;max-width:760px;margin:0 auto}
+
+  h2.titulo{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:400;font-size:clamp(2rem,7vw,3rem);
+    line-height:1.1;margin:.6rem 0 2.5rem;color:var(--ink);
+  }
+  .linha-ouro{width:46px;height:1px;background:var(--gold);margin:0 0 1.2rem}
+
+  /* ====== ABERTURA (overlay escuro) ====== */
+  #abertura{
+    position:fixed;inset:0;z-index:1000;
+    background:radial-gradient(circle at 50% 35%,#2a201c 0%,var(--dark) 70%);
+    color:var(--linen);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:2rem;
+    transition:opacity 1.4s ease, visibility 1.4s ease;
+  }
+  #abertura.saindo{opacity:0;visibility:hidden}
+  #abertura .eyebrow{color:var(--gold)}
+  #abertura .nome-grande{
+    font-family:'Cormorant Garamond',serif;font-weight:400;
+    font-size:clamp(3rem,13vw,5.5rem);line-height:1;margin:1rem 0;
+  }
+  #abertura .sub{color:var(--dark-soft);max-width:24rem;font-size:1rem}
+  .selo{
+    margin-top:3rem;border:1px solid var(--gold);color:var(--gold);
+    background:transparent;border-radius:999px;
+    padding:1rem 2.6rem;font-family:'Mulish';font-size:.78rem;
+    letter-spacing:.28em;text-transform:uppercase;cursor:pointer;
+    transition:all .5s ease;
+  }
+  .selo:hover{background:var(--gold);color:var(--dark)}
+  .pulso{animation:pulso 3s ease-in-out infinite}
+  @keyframes pulso{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ====== HERO ====== */
+  #hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;text-align:center}
+  #hero .ola{font-size:1rem;color:var(--ink-soft);letter-spacing:.05em}
+  #hero h1{
+    font-family:'Cormorant Garamond',serif;font-weight:400;
+    font-size:clamp(2.6rem,10vw,4.4rem);line-height:1.05;margin:1.2rem 0;
+  }
+  #hero h1 em{font-style:italic;color:var(--wine)}
+  .desce{margin-top:3.5rem;color:var(--rose);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase}
+  .desce span{display:block;font-size:1.4rem;margin-top:.4rem;animation:flutua 2.4s ease-in-out infinite}
+  @keyframes flutua{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+  /* ====== CONTADOR ====== */
+  #contador{text-align:center}
+  .relogio{display:flex;justify-content:center;gap:clamp(1rem,5vw,2.6rem);flex-wrap:wrap;margin-top:1rem}
+  .relogio .bloco{min-width:64px}
+  .relogio .num{font-family:'Cormorant Garamond',serif;font-size:clamp(2.4rem,11vw,3.6rem);line-height:1;color:var(--wine)}
+  .relogio .rot{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);margin-top:.5rem}
+  #contador .desde{margin-top:2rem;color:var(--ink-soft);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:1.3rem}
+
+  /* ====== LINHA DO TEMPO ====== */
+  .tl{position:relative;margin-top:1rem}
+  .tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:1px;background:var(--linen-2)}
+  .tl-item{position:relative;padding:0 0 2.6rem 2.4rem}
+  .tl-item::before{content:"";position:absolute;left:0;top:6px;width:15px;height:15px;border-radius:50%;background:var(--linen);border:1px solid var(--rose)}
+  .tl-item:last-child::before{background:var(--rose)}
+  .tl-item .quando{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rose);font-weight:600}
+  .tl-item h3{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:1.5rem;margin:.2rem 0 .1rem}
+  .tl-item .lugar{font-size:.92rem;color:var(--ink-soft)}
+  .tl-item p{margin-top:.4rem;font-size:.96rem}
+
+  /* ====== MOMENTOS (cards foto+texto) ====== */
+  .momentos{display:grid;gap:2.5rem;margin-top:1rem}
+  .momento{display:grid;gap:1rem}
+  .momento .foto{aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:var(--linen-2)}
+  .momento .foto img{width:100%;height:100%;object-fit:cover;display:block}
+  .momento h3{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:1.4rem}
+  .momento p{font-size:.98rem;color:var(--ink-soft)}
+
+  /* ====== GALERIA ====== */
+  .galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem}
+  .galeria .item{aspect-ratio:1;overflow:hidden;background:var(--linen-2);cursor:pointer;position:relative}
+  .galeria .item img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease;display:block}
+  .galeria .item:hover img{transform:scale(1.06)}
+
+  /* placeholder de foto faltando */
+  img.faltando{visibility:hidden}
+  .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+      background:linear-gradient(135deg,var(--linen-2),#ead9a8);color:var(--ink-soft);
+      font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.4rem}
+  .momento .foto .ph{font-size:.72rem}
+
+  /* ====== POR QUE TE AMO ====== */
+  .razoes{list-style:none;margin-top:1rem}
+  .razoes li{padding:1.3rem 0;border-bottom:1px solid var(--linen-2);font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:var(--ink);display:flex;gap:1rem;align-items:baseline}
+  .razoes li::before{content:"♡";color:var(--rose);font-size:1rem}
+
+  /* ====== ABRIR QUANDO ====== */
+  .cartas{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:1rem}
+  .carta{border:1px solid var(--linen-2);border-radius:6px;padding:1.6rem 1.3rem;cursor:pointer;background:#fbf6f1;transition:all .4s ease;min-height:120px;display:flex;flex-direction:column;justify-content:center}
+  .carta:hover{border-color:var(--rose)}
+  .carta .titulo-c{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--wine)}
+  .carta .dica{font-size:.72rem;color:var(--rose);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.4rem}
+  .carta .msg{font-size:.95rem;color:var(--ink-soft);max-height:0;opacity:0;overflow:hidden;transition:all .5s ease;margin-top:0}
+  .carta.aberta .msg{max-height:300px;opacity:1;margin-top:.8rem}
+  .carta.aberta{background:#fff}
+
+  /* ====== MAPA ====== */
+  #mapa{width:100%;height:380px;border-radius:6px;margin-top:1rem;background:var(--linen-2);z-index:1}
+  .leaflet-popup-content{font-family:'Mulish';font-size:.85rem}
+  .pop-tit{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:1.05rem;color:var(--wine)}
+
+  /* ====== CARTA (texto) ====== */
+  #carta{text-align:left}
+  .papel{background:#fff;border:1px solid var(--linen-2);border-radius:4px;padding:2.5rem 2rem;font-family:'Cormorant Garamond',serif;font-size:1.25rem;line-height:1.9}
+  .papel p{margin-bottom:1.2rem}
+  .papel .assina{font-family:'Caveat',cursive;font-size:1.9rem;color:var(--wine);margin-top:1.5rem}
+
+  /* ====== PERGUNTA (final escuro) ====== */
+  #pergunta{max-width:none;background:radial-gradient(circle at 50% 30%,#2a201c,var(--dark));color:var(--linen);text-align:center;padding:8rem 1.5rem}
+  #pergunta .inner{max-width:620px;margin:0 auto}
+  #pergunta .eyebrow{color:var(--gold)}
+  #pergunta h2{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(2rem,8vw,3.2rem);line-height:1.2;margin:1.2rem 0}
+  #pergunta .ps{color:var(--dark-soft);font-size:.95rem;font-style:italic;font-family:'Cormorant Garamond',serif}
+  .btn-sim{margin-top:2.5rem;border:none;background:var(--rose);color:#fff;border-radius:999px;padding:1.1rem 3.4rem;font-family:'Mulish';font-size:.85rem;letter-spacing:.25em;text-transform:uppercase;cursor:pointer;transition:all .4s ease}
+  .btn-sim:hover{background:var(--gold);color:var(--dark)}
+  .resposta{margin-top:2.2rem;opacity:0;max-height:0;overflow:hidden;transition:all 1s ease}
+  .resposta.ver{opacity:1;max-height:400px}
+  .resposta .grande{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold)}
+
+  /* ====== RODAPÉ ====== */
+  footer{background:var(--dark);color:var(--dark-soft);text-align:center;padding:3rem 1.5rem}
+  footer .mao{font-size:1.8rem;color:var(--linen);display:block;margin-bottom:.3rem}
+  footer small{font-size:.7rem;letter-spacing:.15em}
+
+  /* ====== CONTROLE DE MÚSICA ====== */
+  #musica-btn{position:fixed;bottom:1.2rem;right:1.2rem;z-index:900;width:46px;height:46px;border-radius:50%;border:1px solid var(--rose);background:rgba(255,255,255,.85);backdrop-filter:blur(4px);color:var(--wine);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.1rem}
+  #musica-btn.ver{display:flex}
+  #musica-btn.mudo{opacity:.45;text-decoration:line-through}
+
+  /* ====== LIGHTBOX ====== */
+  #lightbox{position:fixed;inset:0;z-index:1100;background:rgba(31,24,21,.94);display:none;align-items:center;justify-content:center;padding:1.5rem;cursor:zoom-out}
+  #lightbox.ver{display:flex}
+  #lightbox img{max-width:100%;max-height:90vh;border-radius:4px}
+
+  /* ====== REVELAR AO ROLAR ====== */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity 1s ease,transform 1s ease}
+  .reveal.visivel{opacity:1;transform:none}
+
+  /* ====== PÉTALAS ====== */
+  .petala{position:fixed;top:-30px;z-index:1050;color:var(--rose);pointer-events:none;animation:cair linear forwards}
+  @keyframes cair{to{transform:translateY(110vh) rotate(360deg);opacity:0}}
+
+  @media (max-width:540px){
+    section{padding:5rem 1.4rem}
+    .galeria{grid-template-columns:repeat(2,1fr)}
+    .cartas{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body class="travado">
+
+<!-- ========================== ABERTURA ========================== -->
+<div id="abertura">
+  <p class="eyebrow">Feliz Dia dos Namorados</p>
+  <p class="nome-grande serif">Andriely</p>
+  <p class="sub">Fiz um cantinho só nosso. Toca aqui pra abrir e deixa a nossa música tocar.</p>
+  <button class="selo pulso" id="entrar">abrir &nbsp;✦</button>
+</div>
+
+<!-- ========================== HERO ========================== -->
+<section id="hero">
+  <p class="ola">Oi, meu amor.</p>
+  <h1 class="serif">Tem um lugar<br>na internet que é<br><em>só nosso</em>.</h1>
+  <p style="color:var(--ink-soft);max-width:30rem;margin:0 auto">Role devagarinho. Sem pressa, do nosso jeito.</p>
+  <div class="desce">role <span>↓</span></div>
+</section>
+
+<!-- ========================== CONTADOR ========================== -->
+<section id="contador" class="reveal">
+  <div class="linha-ouro" style="margin-inline:auto"></div>
+  <p class="eyebrow">desde o primeiro oi</p>
+  <h2 class="titulo">A gente está junto há</h2>
+  <div class="relogio">
+    <div class="bloco"><div class="num" id="c-dias">0</div><div class="rot">dias</div></div>
+    <div class="bloco"><div class="num" id="c-horas">0</div><div class="rot">horas</div></div>
+    <div class="bloco"><div class="num" id="c-min">0</div><div class="rot">minutos</div></div>
+    <div class="bloco"><div class="num" id="c-seg">0</div><div class="rot">segundos</div></div>
+  </div>
+  <p class="desde">e cada segundo valeu a pena.</p>
+</section>
+
+<!-- ========================== NOSSA HISTÓRIA ========================== -->
+<section id="historia" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">nossa história</p>
+  <h2 class="titulo">Os capítulos da gente</h2>
+  <div class="tl" id="timeline"></div>
+</section>
+
+<!-- ========================== MOMENTOS ========================== -->
+<section id="momentos-sec" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">momentos só nossos</p>
+  <h2 class="titulo">Aqueles que eu guardo</h2>
+  <div class="momentos" id="momentos"></div>
+</section>
+
+<!-- ========================== GALERIA ========================== -->
+<section id="galeria-sec" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">nós dois</p>
+  <h2 class="titulo">Um pedacinho de cada dia</h2>
+  <div class="galeria" id="galeria"></div>
+</section>
+
+<!-- ========================== POR QUE TE AMO ========================== -->
+<section id="razoes-sec" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">a verdade</p>
+  <h2 class="titulo">Por que eu te amo</h2>
+  <ul class="razoes" id="razoes"></ul>
+</section>
+
+<!-- ========================== ABRIR QUANDO ========================== -->
+<section id="abrir-sec" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">guarda com você</p>
+  <h2 class="titulo">Cartas pra abrir quando...</h2>
+  <div class="cartas" id="cartas"></div>
+</section>
+
+<!-- ========================== MAPA ========================== -->
+<section id="mapa-sec" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">nossos lugares</p>
+  <h2 class="titulo">Onde a gente deixou um pedaço</h2>
+  <div id="mapa"></div>
+</section>
+
+<!-- ========================== A CARTA ========================== -->
+<section id="carta" class="reveal">
+  <div class="linha-ouro"></div>
+  <p class="eyebrow">de mim, pra você</p>
+  <h2 class="titulo">Uma carta</h2>
+  <div class="papel">
+    <p>Andriely,</p>
+    <p>Eu podia escrever mil coisas, mas a verdade cabe em poucas: você virou o melhor lugar do meu dia. Desde aquele 16 de dezembro, a minha vida ficou com mais cor, mais riso e mais sentido.</p>
+    <p>Obrigado por cada viagem, cada conversa boba, cada café, cada plano que a gente faz juntos. Eu escolho você hoje, amanhã e em todos os "depois" que vierem.</p>
+    <p>Feliz Dia dos Namorados, meu amor. Que venham muitos.</p>
+    <p class="assina">Com todo o meu amor,<br>Lorena Letícia Nogueira do Amaral</p>
+  </div>
+</section>
+
+<!-- ========================== A PERGUNTA ========================== -->
+<section id="pergunta">
+  <div class="inner">
+    <p class="eyebrow">só mais uma coisa</p>
+    <h2 class="serif">Eu, você, dois filhos<br>e um cachorro.</h2>
+    <p class="ps">(com a nossa Papivalinha, o Bolota e, quem sabe, o Papinho 🐾)</p>
+    <p style="margin-top:1.5rem;font-size:1.2rem" class="serif">E aí... tu topa?</p>
+    <button class="btn-sim" id="btn-sim">claro que sim</button>
+    <div class="resposta" id="resposta">
+      <p class="grande serif">Então é a gente, pra vida toda. 🤍</p>
+      <p style="color:var(--dark-soft);margin-top:.8rem">E a gente comemora no show do Luan Santana.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="mao">Andriely &amp; Lorena</span>
+  <small>FEITO COM AMOR · 12 DE JUNHO</small>
+</footer>
+
+<!-- controles -->
+<button id="musica-btn" title="Pausar / tocar a música">♪</button>
+<div id="lightbox"><img src="" alt="" /></div>
+
+<!-- música: coloque o arquivo "devagarinho.mp3" na mesma pasta -->
+<audio id="audio" loop src="devagarinho.mp3"></audio>
+
+<script>
+/* ============================================================= */
+/*  CONFIG, é AQUI que você muda os textos. Mexa à vontade.      */
+/* ============================================================= */
+const CONFIG = {
+
+  // Quando vocês se conheceram (ano, mês, dia), o mês começa em 0! (12 = dezembro)
+  dataInicio: new Date(2023, 11, 16, 0, 0, 0),
+
+  // LINHA DO TEMPO, edite os textos entre aspas
+  historia: [
+    { quando:"16 dez 2023", titulo:"Onde tudo começou", lugar:"El Coyote, Imbituba/SC", texto:"O primeiro oi, o primeiro olhar. A noite que mudou tudo." },
+    { quando:"Pouco depois", titulo:"Nosso primeiro encontro", lugar:"BeiraMar Shopping, Florianópolis", texto:"O frio na barriga de quem já sabia que queria mais." },
+    { quando:"O pedido", titulo:"Quer namorar comigo?", lugar:"Jardins Resto Café, Centro Histórico, São José", texto:"O dia em que a gente deixou de ser \"a gente\" pra ser nós dois oficialmente." },
+    { quando:"Primeira viagem", titulo:"Nossa estreia na estrada", lugar:"Beto Carrero World", texto:"Adrenalina, risada e a certeza de que viajar com você é o melhor programa." },
+    { quando:"Segunda viagem", titulo:"A cidade grande", lugar:"São Paulo", texto:"A gente perdido na multidão, mas sempre achando um ao outro." },
+    { quando:"Terceira viagem", titulo:"Cidade maravilhosa", lugar:"Rio de Janeiro", texto:"Mar, sol e mais uma página linda na nossa história." },
+    { quando:"O que vem aí", titulo:"Nossa lua de mel", lugar:"Maceió", texto:"O próximo capítulo. Mal posso esperar pra viver com você." },
+  ],
+
+  // MOMENTOS (foto + texto). As fotos são fotos/m1.jpg, m2.jpg, m3.jpg
+  momentos: [
+    { foto:"fotos/m1.jpg", titulo:"O nosso lugar", texto:"Aquele momento que só a gente entende." },
+    { foto:"fotos/m2.jpg", titulo:"Risada boba", texto:"Você rindo é a minha parte favorita do dia." },
+    { foto:"fotos/m3.jpg", titulo:"Pra sempre", texto:"Escrevendo um futuro inteiro, devagarinho." },
+  ],
+
+  // GALERIA, quantas fotos (vão ser fotos/1.jpg, 2.jpg, 3.jpg ...)
+  totalFotos: 12,
+
+  // POR QUE TE AMO, pode trocar e adicionar quantas quiser
+  razoes: [
+    "Pelo jeito que você cuida das pessoas que ama.",
+    "Pelas nossas conversas que não têm hora pra acabar.",
+    "Por me fazer rir até nos dias mais difíceis.",
+    "Por ser o meu lar, em qualquer lugar do mundo.",
+    "Por sonhar os mesmos sonhos que eu.",
+    "Por simplesmente ser você.",
+  ],
+
+  // CARTAS "ABRIR QUANDO..."
+  cartas: [
+    { dica:"abra quando", titulo:"...estiver com saudade", msg:"Fecha os olhos. Eu também estou pensando em você nesse exato momento. A gente sempre se encontra." },
+    { dica:"abra quando", titulo:"...tiver um dia ruim", msg:"Respira. Você é mais forte do que imagina, e não está sozinha. Eu estou bem aqui, sempre do seu lado." },
+    { dica:"abra quando", titulo:"...quiser sorrir", msg:"Lembra do nosso primeiro encontro? Eu lembro de cada detalhe. Pronto, agora você já está sorrindo." },
+    { dica:"abra quando", titulo:"...precisar lembrar", msg:"Você é amada. Profundamente, todos os dias, do jeitinho que você é. Nunca duvide disso." },
+    { dica:"abra quando", titulo:"...estiver longe de mim", msg:"A distância é só um detalhe. Onde quer que você esteja, é pra você que eu volto sempre." },
+    { dica:"abra quando", titulo:"...não conseguir dormir", msg:"Fecha os olhos e imagina a gente juntinho. Eu já estou sonhando com você. Boa noite, meu amor." },
+    { dica:"abra quando", titulo:"...estivermos brigadas", msg:"Eu te amo até quando estou de cara fechada. Vem cá, conversa comigo. A gente sempre se acerta." },
+    { dica:"abra quando", titulo:"...for nosso aniversário", msg:"Mais um ano escolhendo você. E eu escolheria de novo, todas as vezes. Feliz nosso dia." },
+    { dica:"abra quando", titulo:"...sentir que não dá conta", msg:"Dá sim. E se um dia parecer pesado demais, lembra: a gente carrega junto. Você nunca está sozinha." },
+  ],
+
+  // MAPA, nome, cidade e coordenadas (você pode ajustar depois se quiser)
+  lugares: [
+    { nome:"Onde nos conhecemos", local:"El Coyote, Imbituba/SC", lat:-28.2353, lng:-48.6701 },
+    { nome:"Primeiro encontro", local:"BeiraMar Shopping, Florianópolis", lat:-27.5876, lng:-48.5497 },
+    { nome:"Pedido de namoro", local:"Jardins Resto Café, São José", lat:-27.6116, lng:-48.6283 },
+    { nome:"1ª viagem", local:"Beto Carrero World", lat:-26.8025, lng:-48.6284 },
+    { nome:"2ª viagem", local:"São Paulo", lat:-23.5505, lng:-46.6333 },
+    { nome:"3ª viagem", local:"Rio de Janeiro", lat:-22.9068, lng:-43.1729 },
+    { nome:"Lua de mel", local:"Maceió", lat:-9.6498, lng:-35.7089 },
+  ],
+};
+
+/* ============================================================= */
+/*  Daqui pra baixo é o "motor" do site, não precisa mexer.      */
+/* ============================================================= */
+
+// ---- placeholder pra foto que ainda não foi adicionada ----
+function comFallback(src, rotulo){
+  return `<img src="${src}" alt="${rotulo}" onerror="this.classList.add('faltando');this.insertAdjacentHTML('afterend','<div class=ph>${rotulo}</div>')">`;
+}
+
+// ---- monta a linha do tempo ----
+document.getElementById('timeline').innerHTML = CONFIG.historia.map(h => `
+  <div class="tl-item">
+    <div class="quando">${h.quando}</div>
+    <h3 class="serif">${h.titulo}</h3>
+    <div class="lugar">${h.lugar}</div>
+    <p>${h.texto}</p>
+  </div>`).join('');
+
+// ---- monta os momentos ----
+document.getElementById('momentos').innerHTML = CONFIG.momentos.map(m => `
+  <div class="momento">
+    <div class="foto">${comFallback(m.foto, m.titulo)}</div>
+    <div><h3 class="serif">${m.titulo}</h3><p>${m.texto}</p></div>
+  </div>`).join('');
+
+// ---- monta a galeria ----
+let galHTML = '';
+for(let i=1;i<=CONFIG.totalFotos;i++){
+  galHTML += `<div class="item" data-src="fotos/${i}.jpg">${comFallback('fotos/'+i+'.jpg','foto '+i)}</div>`;
+}
+document.getElementById('galeria').innerHTML = galHTML;
+
+// ---- monta as razões ----
+document.getElementById('razoes').innerHTML = CONFIG.razoes.map(r => `<li>${r}</li>`).join('');
+
+// ---- monta as cartas ----
+document.getElementById('cartas').innerHTML = CONFIG.cartas.map(c => `
+  <div class="carta">
+    <div class="dica">${c.dica}</div>
+    <div class="titulo-c serif">${c.titulo}</div>
+    <div class="msg">${c.msg}</div>
+  </div>`).join('');
+document.querySelectorAll('.carta').forEach(c => c.addEventListener('click', () => c.classList.toggle('aberta')));
+
+// ---- contador ----
+function tick(){
+  const diff = Date.now() - CONFIG.dataInicio.getTime();
+  if(diff < 0) return;
+  const s = Math.floor(diff/1000);
+  document.getElementById('c-dias').textContent = Math.floor(s/86400);
+  document.getElementById('c-horas').textContent = Math.floor(s%86400/3600);
+  document.getElementById('c-min').textContent = Math.floor(s%3600/60);
+  document.getElementById('c-seg').textContent = s%60;
+}
+tick(); setInterval(tick,1000);
+
+// ---- revelar ao rolar ----
+const obs = new IntersectionObserver((entradas)=>{
+  entradas.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visivel'); obs.unobserve(e.target);} });
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ---- abertura + música ----
+const audio = document.getElementById('audio');
+const musBtn = document.getElementById('musica-btn');
+document.getElementById('entrar').addEventListener('click', ()=>{
+  document.getElementById('abertura').classList.add('saindo');
+  document.body.classList.remove('travado');
+  audio.volume = .55;
+  audio.play().then(()=>musBtn.classList.add('ver')).catch(()=>{ musBtn.classList.add('ver'); });
+  window.scrollTo({top:0});
+});
+musBtn.addEventListener('click', ()=>{
+  if(audio.paused){ audio.play(); musBtn.classList.remove('mudo'); }
+  else { audio.pause(); musBtn.classList.add('mudo'); }
+});
+
+// ---- lightbox da galeria ----
+const lb = document.getElementById('lightbox');
+const lbImg = lb.querySelector('img');
+document.getElementById('galeria').addEventListener('click', e=>{
+  const item = e.target.closest('.item');
+  if(!item) return;
+  const img = item.querySelector('img');
+  if(img && !img.classList.contains('faltando')){ lbImg.src = item.dataset.src; lb.classList.add('ver'); }
+});
+lb.addEventListener('click', ()=>lb.classList.remove('ver'));
+
+// ---- a pergunta + pétalas ----
+document.getElementById('btn-sim').addEventListener('click', ()=>{
+  document.getElementById('resposta').classList.add('ver');
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  for(let i=0;i<40;i++){
+    const p = document.createElement('div');
+    p.className='petala'; p.textContent='❀';
+    p.style.left = Math.random()*100+'vw';
+    p.style.fontSize = (12+Math.random()*16)+'px';
+    p.style.animationDuration = (4+Math.random()*4)+'s';
+    p.style.animationDelay = (Math.random()*1.5)+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 9000);
+  }
+});
+
+// ---- mapa ----
+window.addEventListener('load', ()=>{
+  if(typeof L === 'undefined') return; // sem internet, o mapa não carrega
+  const map = L.map('mapa', {scrollWheelZoom:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap, &copy; CARTO', maxZoom:18
+  }).addTo(map);
+  const pts=[];
+  CONFIG.lugares.forEach(l=>{
+    const m = L.circleMarker([l.lat,l.lng],{radius:7,color:'#b07b73',fillColor:'#b07b73',fillOpacity:.9,weight:2}).addTo(map);
+    m.bindPopup(`<div class="pop-tit">${l.nome}</div>${l.local}`);
+    pts.push([l.lat,l.lng]);
+  });
+  map.fitBounds(pts,{padding:[40,40]});
+});
+</script>
+</body>
+</html>
