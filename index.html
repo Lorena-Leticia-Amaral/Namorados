@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Para a Andry</title>
+<title>Para a Andriely</title>
 
 <!-- ========================================================= -->
 <!--  Fontes                                                   -->
@@ -253,7 +253,7 @@
     <use href="#girassol" transform="translate(162 120) scale(.72)"/>
     <use href="#girassol" transform="translate(120 96) scale(1.02)"/>
   </svg>
-  <p class="nome-grande serif">Popoza</p>
+  <p class="nome-grande serif">Andriely</p>
   <p class="sub">Um buquê de girassóis pra você. Toca pra receber as flores e deixar a nossa música tocar.</p>
   <button class="selo pulso" id="entrar">receber as flores &nbsp;✿</button>
 </div>
@@ -334,7 +334,7 @@
   <p class="eyebrow">de mim, pra você</p>
   <h2 class="titulo">Uma carta</h2>
   <div class="papel">
-    <p>Denguinho,</p>
+    <p>Andriely,</p>
     <p>Eu podia escrever mil coisas, mas a verdade cabe em poucas: você virou o melhor lugar do meu dia. Desde aquele 16 de dezembro, a minha vida ficou com mais cor, mais riso e mais sentido.</p>
     <p>Obrigado por cada viagem, cada conversa boba, cada café, cada plano que a gente faz juntos. Eu escolho você hoje, amanhã e em todos os "depois" que vierem.</p>
     <p>Feliz Dia dos Namorados, meu amor. Que venham muitos.</p>
@@ -389,14 +389,14 @@ const CONFIG = {
     { quando:"O que vem aí", titulo:"Nossa lua de mel", lugar:"Maceió", texto:"O próximo capítulo. Mal posso esperar pra viver com você." },
   ],
 
-  // MOMENTOS (foto + texto). As fotos são fotos/m1.jpg, m2.jpg, m3.jpg
+  // MOMENTOS (foto + texto). As fotos são fotos/m1.jpeg, m2.jpeg, m3.jpeg
   momentos: [
-    { foto:"fotos/m1.jpg", titulo:"O nosso lugar", texto:"Aquele momento que só a gente entende." },
-    { foto:"fotos/m2.jpg", titulo:"Risada boba", texto:"Você rindo é a minha parte favorita do dia." },
-    { foto:"fotos/m3.jpg", titulo:"Pra sempre", texto:"Escrevendo um futuro inteiro, devagarinho." },
+    { foto:"fotos/m1.jpeg", titulo:"O nosso lugar", texto:"Aquele momento que só a gente entende." },
+    { foto:"fotos/m2.jpeg", titulo:"Risada boba", texto:"Você rindo é a minha parte favorita do dia." },
+    { foto:"fotos/m3.jpeg", titulo:"Pra sempre", texto:"Escrevendo um futuro inteiro, devagarinho." },
   ],
 
-  // GALERIA, quantas fotos (vão ser fotos/1.jpg, 2.jpg, 3.jpg ...)
+  // GALERIA, quantas fotos (vão ser fotos/1.jpeg, 2.jpeg, 3.jpeg ...)
   totalFotos: 20,
 
   // POR QUE TE AMO, pode trocar e adicionar quantas quiser
@@ -462,7 +462,7 @@ document.getElementById('momentos').innerHTML = CONFIG.momentos.map(m => `
 // ---- monta a galeria ----
 let galHTML = '';
 for(let i=1;i<=CONFIG.totalFotos;i++){
-  galHTML += `<div class="item" data-src="fotos/${i}.jpg">${comFallback('fotos/'+i+'.jpg','foto '+i)}</div>`;
+  galHTML += `<div class="item" data-src="fotos/${i}.jpeg">${comFallback('fotos/'+i+'.jpeg','foto '+i)}</div>`;
 }
 document.getElementById('galeria').innerHTML = galHTML;
 
